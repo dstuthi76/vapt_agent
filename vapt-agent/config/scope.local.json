@@ -1,0 +1,16 @@
+{
+  "engagement": "Local single-machine lab (targets published on 127.0.0.1)",
+  "authorization_ref": "LOCAL-LAB-001 (your own machine; replace with your authorization reference)",
+  "authorized_by": "Machine owner",
+  "window": {"start": null, "end": null},
+  "targets": [
+    {"value": "127.0.0.1", "label": "local docker-published lab apps", "criticality": "medium", "exposure": "internal"}
+  ],
+  "host_aliases": {},
+  "exclusions": [],
+  "allowed_ports": "3000,8081,8090-8091,21-23,80,443,445",
+  "allowed_tools": ["nmap", "nikto", "zap", "openvas", "nessus", "burp", "metasploit"],
+  "max_rate_pps": 200,
+  "allow_non_private": false,
+  "notes": "Use with: docker run -p 127.0.0.1:3000:3000 bkimminich/juice-shop ; docker run -p 127.0.0.1:8081:80 vulnerables/web-dvwa"
+}

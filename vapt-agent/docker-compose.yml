@@ -1,0 +1,87 @@
+# Isolated sandbox lab + agent + ZAP.  Network 172.28.10.0/24 is internal to Docker.
+#
+#   docker compose up -d --build                      # agent + ZAP + Juice Shop + DVWA
+#   docker compose --profile full up -d --build       # + Metasploitable 2 (network targets)
+#   docker compose --profile full --profile validation up -d --build   # + msfrpcd for approved validation
+#
+# Console: http://localhost:8080   (published on 127.0.0.1 only)
+
+name: vapt-lab
+
+networks:
+  lab:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.10.0/24
+          gateway: 172.28.10.1
+
+services:
+  agent:
+    build: .
+    container_name: vapt-agent
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      ZAP_URL: http://zap:8090
+      ZAP_API_KEY: ${ZAP_API_KEY:-vapt-lab-zap-key}
+      MSF_RPC_HOST: ${MSF_RPC_HOST:-}
+      MSF_RPC_PASS: ${MSF_RPC_PASS:-vapt-lab-msf-pass}
+      VAPT_SCOPE_FILE: /app/config/scope.lab.json
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+    networks:
+      lab:
+        ipv4_address: 172.28.10.5
+    extra_hosts:
+      - "host.docker.internal:host-gateway"   # lets the agent reach Ollama on the host
+    depends_on: [zap]
+
+  zap:
+    image: zaproxy/zap-stable
+    container_name: vapt-zap
+    command: >
+      zap.sh -daemon -host 0.0.0.0 -port 8090
+      -config api.key=${ZAP_API_KEY:-vapt-lab-zap-key}
+      -config api.addrs.addr.name=.* -config api.addrs.addr.regex=true
+    networks:
+      lab:
+        ipv4_address: 172.28.10.6
+
+  juice-shop:
+    image: bkimminich/juice-shop
+    container_name: lab-juice-shop
+    networks:
+      lab:
+        ipv4_address: 172.28.10.10
+
+  dvwa:
+    image: vulnerables/web-dvwa
+    container_name: lab-dvwa
+    networks:
+      lab:
+        ipv4_address: 172.28.10.11
+
+  metasploitable:
+    image: tleemcjr/metasploitable2
+    container_name: lab-metasploitable
+    profiles: ["full"]
+    command: sh -c "/bin/services.sh && tail -f /dev/null"
+    tty: true
+    networks:
+      lab:
+        ipv4_address: 172.28.10.12
+
+  msf:
+    image: metasploitframework/metasploit-framework
+    container_name: vapt-msfrpcd
+    profiles: ["validation"]
+    entrypoint: []
+    command: ["./msfrpcd", "-U", "msf", "-P", "${MSF_RPC_PASS:-vapt-lab-msf-pass}", "-a", "0.0.0.0", "-p", "55553", "-S", "-f"]
+    networks:
+      lab:
+        ipv4_address: 172.28.10.7

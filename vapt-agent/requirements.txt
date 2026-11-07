@@ -1,0 +1,7 @@
+flask>=3.0
+requests>=2.31
+reportlab>=4.0
+# optional:
+#   msgpack      -> Metasploit validation through msfrpcd (MSF_RPC_HOST)
+#   python-gvm   -> experimental live OpenVAS mode (GVM_SOCKET)
+#   pytest       -> running the test-suite

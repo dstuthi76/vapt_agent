@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SYNTHETIC TEST FIXTURE: hand-written in Nmap XML format to exercise the parser. Not real scanner output. -->
+<nmaprun scanner="nmap" args="nmap -sV -oX - 172.28.10.10-12" startstr="Wed Nov  4 10:00:00 2026" version="7.94">
+<host><status state="up"/><address addr="172.28.10.10" addrtype="ipv4"/><hostnames><hostname name="juice-shop" type="PTR"/></hostnames>
+<ports><port protocol="tcp" portid="3000"><state state="open"/><service name="http" product="Node.js Express framework"/></port></ports></host>
+<host><status state="up"/><address addr="172.28.10.11" addrtype="ipv4"/><hostnames><hostname name="dvwa" type="PTR"/></hostnames>
+<ports><port protocol="tcp" portid="80"><state state="open"/><service name="http" product="Apache httpd" version="2.4.25" extrainfo="(Debian)"><cpe>cpe:/a:apache:http_server:2.4.25</cpe></service>
+<script id="http-methods" output="&#xa;  Supported Methods: GET HEAD POST OPTIONS TRACE&#xa;  Potentially risky methods: TRACE"/></port></ports></host>
+<host><status state="up"/><address addr="172.28.10.12" addrtype="ipv4"/><hostnames><hostname name="metasploitable" type="PTR"/></hostnames>
+<ports>
+<port protocol="tcp" portid="21"><state state="open"/><service name="ftp" product="vsftpd" version="2.3.4"/>
+<script id="ftp-anon" output="Anonymous FTP login allowed (FTP code 230)"/></port>
+<port protocol="tcp" portid="22"><state state="open"/><service name="ssh" product="OpenSSH" version="4.7p1 Debian 8ubuntu1"/></port>
+<port protocol="tcp" portid="23"><state state="open"/><service name="telnet" product="Linux telnetd"/></port>
+<port protocol="tcp" portid="80"><state state="open"/><service name="http" product="Apache httpd" version="2.2.8" extrainfo="(Ubuntu) DAV/2"/></port>
+<port protocol="tcp" portid="445"><state state="open"/><service name="netbios-ssn" product="Samba smbd" version="3.X - 4.X"/>
+<script id="smb-security-mode" output="&#xa;  account_used: guest&#xa;  authentication_level: user&#xa;  challenge_response: supported&#xa;  message_signing: disabled (dangerous, but default)"/></port>
+</ports></host>
+</nmaprun>

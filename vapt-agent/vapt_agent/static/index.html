@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VAPT-Agent — Analyst Console</title>
+<style>
+:root{--bg:#0f1419;--panel:#161d26;--panel2:#1d2631;--line:#2b3846;--tx:#d9e2ec;--mut:#8a9bb0;--acc:#4fb3ff;--ok:#2ecc71;--warn:#f5b041;--bad:#e74c3c;--ai:#b07cd8;
+--critical:#a3132d;--high:#e74c3c;--medium:#e59b1f;--low:#3498db;--info:#7f8c8d}
+*{box-sizing:border-box}body{margin:0;display:flex;flex-direction:column;height:100vh;font:13px/1.45 system-ui,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--tx)}
+header{display:flex;align-items:center;gap:14px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+header h1{font-size:16px;margin:0;letter-spacing:.3px}header h1 span{color:var(--acc)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}.chip{padding:2px 8px;border-radius:10px;border:1px solid var(--line);font-size:11px;color:var(--mut)}
+.chip.on{border-color:#1e8449;color:#7dcea0}.chip.off{border-color:#7b241c;color:#f1948a}
+main{display:grid;grid-template-columns:400px minmax(0,1fr);flex:1;min-height:0}
+#left{border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+#msgs{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.m{padding:8px 10px;border-radius:8px;white-space:pre-wrap;max-width:95%}.m.analyst{align-self:flex-end;background:#1f3a52}
+.m.agent{background:var(--panel2);border:1px solid var(--line)}.m small{display:block;color:var(--mut);font-size:10px}
+#composer{border-top:1px solid var(--line);padding:10px;display:flex;flex-direction:column;gap:6px}
+textarea,input,select{background:var(--panel2);color:var(--tx);border:1px solid var(--line);border-radius:6px;padding:7px;font:inherit}
+textarea{resize:vertical;min-height:60px}
+button{background:var(--acc);color:#04121f;border:0;border-radius:6px;padding:6px 12px;font-weight:600;cursor:pointer}
+button.sec{background:var(--panel2);color:var(--tx);border:1px solid var(--line)}button.bad{background:var(--bad);color:#fff}button.ok{background:var(--ok);color:#04121f}
+button:disabled{opacity:.4;cursor:default}
+#right{display:flex;flex-direction:column;min-height:0;min-width:0}
+nav{display:flex;gap:2px;padding:6px 10px 0;border-bottom:1px solid var(--line);background:var(--panel)}
+nav a{padding:7px 12px;color:var(--mut);cursor:pointer;border-radius:6px 6px 0 0}nav a.act{background:var(--bg);color:var(--tx);border:1px solid var(--line);border-bottom:0}
+#view{flex:1;overflow:auto;padding:14px}
+table{width:100%;border-collapse:collapse;font-size:12px}th,td{border-bottom:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+th{color:var(--mut);font-weight:600;position:sticky;top:0;background:var(--bg)}
+.sev{padding:1px 7px;border-radius:9px;color:#fff;font-size:11px;font-weight:700;text-transform:uppercase}
+.st{font-size:11px;padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+.st.succeeded,.st.done,.st.approved,.st.confirmed{color:#7dcea0;border-color:#1e8449}.st.failed,.st.timeout,.st.blocked,.st.rejected,.st.false_positive,.st.likely_false_positive{color:#f1948a;border-color:#922b21}
+.st.running,.st.queued{color:#85c1e9;border-color:#2471a3}.st.proposed,.st.unavailable,.st.suspected,.st.skipped{color:#f8c471;border-color:#9a7d0a}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:12px}
+.card h3{margin:0 0 8px;font-size:13px}.mut{color:var(--mut)}.ai{border-left:3px solid var(--ai);padding-left:8px;color:#d7bde2}
+.approval{border:1px solid var(--warn);background:#2a2412}
+pre{background:#0b0f14;border:1px solid var(--line);padding:8px;border-radius:6px;overflow:auto;max-height:240px;font-size:11px;white-space:pre-wrap}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.grow{flex:1}
+details summary{cursor:pointer}.kv{display:grid;grid-template-columns:150px 1fr;gap:3px 10px;font-size:12px}
+.kv div:nth-child(odd){color:var(--mut)}a.lnk{color:var(--acc)}
+.banner{padding:8px 12px;background:#1b2631;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center}
+.ex{font-size:11px;color:var(--acc);cursor:pointer;text-decoration:underline dotted}
+</style>
+</head>
+<body>
+<header>
+  <h1>VAPT<span>-Agent</span></h1>
+  <select id="asmSel" title="Assessments"></select>
+  <button class="sec" onclick="newAsm()">+ New assessment</button>
+  <div class="chips" id="chips"></div>
+  <div class="grow"></div>
+  <input id="analyst" placeholder="analyst name" style="width:130px">
+</header>
+<main>
+  <section id="left">
+    <div id="msgs"></div>
+    <div id="composer">
+      <textarea id="input" placeholder="Describe the authorized assessment, e.g. 'Run a full network and web assessment of 172.28.10.0/24'"></textarea>
+      <div class="row">
+        <span class="ex" onclick="ex('Run a full end-to-end network and web assessment of the lab subnet 172.28.10.0/24')">example: subnet</span>
+        <span class="ex" onclick="ex('Assess the web application at http://juice-shop:3000 , standard intensity')">example: web app</span>
+        <span class="ex" onclick="ex('Scan 8.8.8.8 and scanme.nmap.org')">example: out-of-scope</span>
+        <div class="grow"></div><button id="sendBtn" onclick="send()">Send</button>
+      </div>
+    </div>
+  </section>
+  <section id="right">
+    <div class="banner" id="banner"></div>
+    <nav id="tabs"></nav>
+    <div id="view"></div>
+  </section>
+</main>
+<script>
+const TABS=["Plan & Approvals","Jobs","Assets","Findings","Decisions","Audit","Imports","Integrations","Scope","Report"];
+let tab="Plan & Approvals", cur=null, S=null, health=null, openF=new Set();
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const who=()=>($("#analyst").value||"analyst").trim();
+$("#analyst").value=localStorage.getItem("analyst")||"";$("#analyst").onchange=e=>localStorage.setItem("analyst",e.target.value);
+async function api(p,o={}){const r=await fetch(p,{headers:o.body instanceof FormData?{}:{"Content-Type":"application/json"},...o});
+ const j=await r.json().catch(()=>({}));if(!r.ok){alert(j.error||r.statusText);throw new Error(j.error)}return j}
+const post=(p,b)=>api(p,{method:"POST",body:JSON.stringify({analyst:who(),...b})});
+function ex(t){$("#input").value=t}
+function newAsm(){cur=null;S=null;$("#asmSel").value="";render()}
+async function loadList(){const l=await api("/api/assessments");$("#asmSel").innerHTML='<option value="">— assessments —</option>'+l.map(a=>`<option value="${a.id}" ${a.id===cur?"selected":""}>${a.id} · ${esc(a.status)} · ${esc(a.request.slice(0,40))}</option>`).join("")}
+$("#asmSel").onchange=e=>{cur=e.target.value||null;refresh()};
+async function send(){const t=$("#input").value.trim();if(!t)return;$("#sendBtn").disabled=true;
+ try{if(!cur){const s=await post("/api/assessments",{request:t});cur=s.id;await loadList()}else{await post(`/api/assessments/${cur}/chat`,{text:t})}
+ $("#input").value="";await refresh()}finally{$("#sendBtn").disabled=false}}
+async function refresh(){if(cur){S=await api(`/api/assessments/${cur}`)}render()}
+function sev(s){return `<span class="sev" style="background:var(--${s})">${s}</span>`}
+function st(s){return `<span class="st ${s}">${s}</span>`}
+function render(){
+ $("#chips").innerHTML=health?`<span class="chip ${health.llm.startsWith("rule")?"off":"on"}">AI: ${esc(health.llm)}</span>`+Object.entries(health.tools).map(([k,v])=>`<span class="chip ${v.available?"on":"off"}" title="${esc(v.detail)}">${k}</span>`).join(""):"";
+ $("#tabs").innerHTML=TABS.map(t=>`<a class="${t===tab?"act":""}" onclick="tab='${t}';render()">${t}${t==="Plan & Approvals"&&S&&S.pending.length?` (${S.pending.length})`:""}</a>`).join("");
+ $("#msgs").innerHTML=S?S.messages.map(m=>`<div class="m ${m.role}"><small>${m.role} · ${m.ts}</small>${esc(m.text)}</div>`).join(""):
+  `<div class="m agent"><small>agent</small>Hello. Describe an authorized assessment in plain language. I will validate every target against the registered scope, propose a plan with reasons, and wait for your approval before scanning. Active validation always needs a separate approval.</div>`;
+ $("#msgs").scrollTop=1e9;
+ $("#banner").innerHTML=S?`<b>${S.id}</b> ${st(S.status)} <span class="mut">intent: ${esc((S.intent.focus||[]).join("+"))}, ${esc(S.intent.intensity)}${S.intent.no_intrusive?", non-intrusive":""} · reasoning: ${esc(S.llm)}</span><div class="grow"></div>
+  <span class="mut">audit chain: ${S.audit_verify.valid?"✔ valid":"✘ BROKEN"} (${S.audit_verify.entries||0})</span>`:`<span class="mut">No assessment selected — type a request on the left.</span>`;
+ const v=$("#view");v.innerHTML=S||["Integrations","Scope"].includes(tab)?(V[tab]||(()=>""))():`<p class="mut">Start or select an assessment.</p>`;
+}
+const V={};
+V["Plan & Approvals"]=()=>{
+ let h="";
+ if(S.rejected_targets.length)h+=`<div class="card" style="border-color:var(--bad)"><h3>Rejected by scope guard</h3>${S.rejected_targets.map(r=>`<div>✘ <b>${esc(r.target)}</b> — ${esc(r.reason)}</div>`).join("")}</div>`;
+ if(S.status==="awaiting_plan_approval")h+=`<div class="card approval"><h3>Plan awaiting approval</h3><p>Approving runs the non-intrusive reconnaissance below. Follow-up non-intrusive scans chosen from evidence ${health&&health.auto_approve_followups?"run automatically within scope":"need approval"}; intrusive and validation actions always need a separate decision.</p><button class="ok" onclick="post('/api/assessments/${cur}/plan/approve',{}).then(refresh)">Approve plan</button></div>`;
+ const pend=S.pending;
+ if(pend.length)h+=`<div class="card approval"><h3>⚠ Human approval required (${pend.length})</h3>${pend.map(a=>`<div class="card"><div class="row"><b>${esc(a.tool)}</b> → ${esc(a.target)} ${a.intrusive?'<span class="st failed">INTRUSIVE</span>':""} <span class="mut">${esc(a.phase)}</span></div>
+  <div class="mut">${esc(JSON.stringify(a.params))}</div><p>${esc(a.rationale)}</p>
+  <div class="row"><input id="r_${a.id}" class="grow" placeholder="reason (recorded in audit trail)"><button class="ok" onclick="dec('${a.id}','approve')">Approve</button><button class="bad" onclick="dec('${a.id}','reject')">Reject</button></div></div>`).join("")}</div>`;
+ h+=`<div class="card"><h3>Anticipated adaptive steps</h3><ol>${S.anticipated.map(x=>`<li>${esc(x)}</li>`).join("")}</ol></div>`;
+ h+=`<div class="card"><h3>All actions (${S.actions.length})</h3><table><tr><th>Action</th><th>Phase</th><th>Tool → target</th><th>Status</th><th>Decided by</th><th>Rationale</th></tr>${S.actions.map(a=>`<tr><td>${a.id}</td><td>${a.phase}</td><td><b>${esc(a.tool)}</b> ${esc(a.target)}<div class="mut">${esc(JSON.stringify(a.params))}</div></td><td>${st(a.status)}</td><td>${esc(a.decided_by||"-")}</td><td>${esc(a.rationale)}${a.reasoning_source!=="rules"?' <span class="ai">LLM-assisted</span>':""}</td></tr>`).join("")}</table></div>`;
+ return h};
+async function dec(id,d){await post(`/api/assessments/${cur}/actions/${id}/decision`,{decision:d,reason:$("#r_"+id).value});refresh()}
+V["Jobs"]=()=>`<table><tr><th>Job</th><th>Tool</th><th>Mode</th><th>Target</th><th>Status</th><th>Time</th><th>Command / API calls actually executed</th><th>Raw output</th></tr>${S.jobs.map(j=>`<tr><td>${j.id}</td><td>${j.tool}</td><td>${j.mode}</td><td>${esc(j.target)}</td><td>${st(j.status)} ${j.attempts>1?`<span class="mut">(${j.attempts} attempts)</span>`:""}${j.error?`<div style="color:#f1948a">${esc(j.error)}</div>`:""}</td><td class="mut">${j.started_at||""}<br>${j.finished_at||""}</td><td><code>${esc(j.command||"")}</code>${j.log&&j.log.length?`<details><summary class="mut">log</summary><pre>${esc(j.log.join("\n"))}</pre></details>`:""}</td><td>${(j.raw_files||[]).map(r=>`<a class="lnk" target="_blank" href="/api/assessments/${cur}/raw/${r}">${esc(r.split("/").pop())}</a>`).join("<br>")}</td></tr>`).join("")}</table>`;
+V["Assets"]=()=>Object.values(S.hosts).map(h=>`<div class="card"><h3>${h.address} <span class="mut">${esc(h.hostnames.join(", "))} ${esc(h.os_guess||"")}</span></h3><table><tr><th>Port</th><th>State</th><th>Service</th><th>Product / version</th></tr>${h.services.map(s=>`<tr><td>${s.port}/${s.proto}</td><td>${s.state}</td><td>${esc(s.name||"")}${s.tunnel?" ("+s.tunnel+")":""}</td><td>${esc((s.product||"")+" "+(s.version||"")+" "+(s.extrainfo||""))}</td></tr>`).join("")}</table><div class="mut">observed by ${[...new Set(h.sources)].join(", ")}</div></div>`).join("")||`<p class="mut">No hosts yet.</p>`;
+V["Findings"]=()=>{const c=S.correlation_stats||{};return `<p class="mut">${c.raw||0} raw tool results → ${c.correlated||0} correlated findings (${c.merged_duplicates||0} duplicates merged, ${c.multi_tool||0} multi-tool corroborated). Sorted by contextual risk.</p><table><tr><th>ID</th><th>Finding</th><th>Asset</th><th>Severity</th><th>CVSS</th><th>Risk</th><th>Conf.</th><th>Status</th><th>Sources</th></tr>${S.findings.map(f=>`<tr style="cursor:pointer" onclick="tog('${f.id}')"><td>${f.id}</td><td>${esc(f.title)}${f.cves.length?`<div class="mut">${f.cves.slice(0,4).join(", ")}${f.cves.length>4?"…":""}</div>`:""}</td><td>${[...new Set(f.affected.map(a=>a.asset+(a.port?":"+a.port:"")))].slice(0,3).join("<br>")}</td><td>${sev(f.severity)}</td><td>${f.cvss_score??"n/a"}</td><td><b>${f.risk_score}</b> ${f.priority}</td><td>${f.confidence}</td><td>${st(f.status)}</td><td>${f.source_tools.join(", ")}</td></tr>${openF.has(f.id)?`<tr><td colspan="9">${fdetail(f)}</td></tr>`:""}`).join("")}</table>`};
+function tog(id){openF.has(id)?openF.delete(id):openF.add(id);render()}
+function fdetail(f){return `<div class="card"><div class="kv">
+ <div>Description</div><div>${esc(f.description.slice(0,900))}</div>
+ <div>CWE / OWASP / ATT&CK</div><div>${f.cwes.map(c=>"CWE-"+c).join(", ")||"n/a"} · ${esc(f.owasp.join("; "))||"n/a"} · ${esc(f.attack.join("; "))||"n/a"}</div>
+ <div>CVSS source</div><div>${esc(f.cvss_source||"no CVSS supplied by any tool")} ${esc(f.cvss_vector||"")}</div>
+ <div>Risk calculation</div><div>${esc(f.risk_breakdown.formula)} — ${esc(f.risk_breakdown.base_source)}; exploitability: ${esc(f.risk_breakdown.exploitability_source)}; exposure ${esc(f.risk_breakdown.exposure_source)}; criticality ${esc(f.risk_breakdown.criticality_source)}</div>
+ <div>Confidence factors</div><div>${f.confidence_factors.map(esc).join("<br>")}</div>
+ <div>Notes</div><div>${esc(f.notes.join(" "))||"-"}</div>
+ <div>Remediation</div><div>${esc(f.solution.slice(0,600))}</div></div>
+ <h3 style="margin-top:10px">Evidence (${f.evidence.length}) — observed, traceable to raw output</h3>${f.evidence.map(e=>`<div class="mut">[${e.source_tool} · ${e.mode} · ${e.job_id} · ${e.observed_at} · tool sev: ${esc(e.tool_severity)}${e.tool_confidence?" · tool conf: "+esc(e.tool_confidence):""} · ${esc(e.tool_ref_id||"")}] <a class="lnk" target="_blank" href="/api/assessments/${cur}/raw/${e.raw_ref}">${esc(e.raw_ref)}</a> sha256:${e.raw_sha256.slice(0,12)}…</div><pre>${esc(e.excerpt)}</pre>`).join("")}
+ ${f.validation.map(v=>`<div class="card"><b>Validation</b> ${esc(v.module)} (${v.method}) → ${st(v.outcome)} approved by ${esc(v.approved_by)}<pre>${esc(v.excerpt)}</pre></div>`).join("")}
+ <div class="row"><input id="t_${f.id}" class="grow" placeholder="triage reason (required)">
+ <button class="sec" onclick="tri('${f.id}','false_positive')">Mark false positive</button><button class="sec" onclick="tri('${f.id}','confirmed')">Mark confirmed (manual)</button><button class="sec" onclick="tri('${f.id}','suspected')">Reset to suspected</button>
+ <button onclick="val('${f.id}')">Request active validation…</button></div></div>`}
+async function tri(id,s){await post(`/api/assessments/${cur}/findings/${id}/triage`,{status:s,reason:$("#t_"+id).value});refresh()}
+async function val(id){await post(`/api/assessments/${cur}/findings/${id}/validate`,{});tab="Plan & Approvals";refresh()}
+V["Decisions"]=()=>`<table><tr><th>Time</th><th>Type</th><th>Decision & reasoning</th><th>Evidence refs</th></tr>${S.decisions.slice().reverse().map(d=>`<tr><td class="mut">${d.ts}</td><td>${d.type}</td><td>${esc(d.text)}</td><td class="mut">${(d.refs||[]).join(", ")}</td></tr>`).join("")}</table>`;
+V["Audit"]=()=>{api(`/api/assessments/${cur}/audit`).then(a=>{const el=$("#auditT");if(el)el.innerHTML=`<p>Hash chain: <b>${a.verify.valid?"VALID":"BROKEN at "+a.verify.broken_at}</b></p><table><tr><th>Time</th><th>Event</th><th>Actor</th><th>Details</th><th>Hash</th></tr>${a.entries.slice().reverse().map(e=>`<tr><td class="mut">${e.ts}</td><td>${e.event}</td><td>${esc(e.actor)}</td><td><code>${esc(JSON.stringify(e.details).slice(0,300))}</code></td><td class="mut">${e.hash.slice(0,10)}</td></tr>`).join("")}</table>`});return `<div id="auditT">loading…</div>`};
+V["Imports"]=()=>`<div class="card"><h3>Import recorded tool output (import-only — clearly marked as not executed live)</h3>
+ <div class="row"><select id="impTool"><option value="nessus">Nessus (.nessus)</option><option value="openvas">OpenVAS / Greenbone (XML report)</option><option value="burp">Burp Suite (issues XML export)</option><option value="zap">OWASP ZAP (JSON/XML report)</option><option value="nikto">Nikto (XML/JSON)</option><option value="nmap">Nmap (XML)</option></select>
+ <input type="file" id="impFile"><button onclick="imp()">Import</button></div><p class="mut">Assets outside the registered scope are dropped and the drop is logged.</p></div>`;
+async function imp(){const f=$("#impFile").files[0];if(!f)return alert("choose a file");const fd=new FormData();fd.append("file",f);fd.append("tool",$("#impTool").value);fd.append("analyst",who());
+ const r=await api(`/api/assessments/${cur}/imports`,{method:"POST",body:fd});alert(`Imported: ${r.findings} findings; dropped out-of-scope: ${r.dropped_out_of_scope}`);refresh()}
+V["Integrations"]=()=>health?`<table><tr><th>Tool</th><th>Declared status</th><th>Runtime availability</th><th>How</th><th>Limitations</th></tr>${health.matrix.map(m=>`<tr><td><b>${m.tool}</b></td><td>${esc(m.status)}</td><td>${health.tools[m.key].available?'<span class="st succeeded">available</span>':'<span class="st failed">unavailable</span>'}<div class="mut">${esc(health.tools[m.key].detail)}</div></td><td>${esc(m.how)}</td><td>${esc(m.limits)}</td></tr>`).join("")}</table>`:"";
+V["Scope"]=()=>{setTimeout(async()=>{const s=await api("/api/scope");const el=$("#scopeT");if(el)el.innerHTML=`<pre>${esc(JSON.stringify(s,null,1))}</pre>`},0);return `<div class="card"><h3>Test a target against the scope guard</h3><div class="row"><input id="sc" class="grow" placeholder="IP, CIDR, hostname or URL"><button onclick="chk()">Check</button></div><div id="scr"></div></div><div class="card"><h3>Registered scope</h3><div id="scopeT"></div><button class="sec" onclick="api('/api/scope/reload',{method:'POST'}).then(()=>render())">Reload scope file</button></div>`};
+async function chk(){const r=await post("/api/scope/check",{target:$("#sc").value});$("#scr").innerHTML=`<p>${r.allowed?"✔ ALLOWED":"✘ DENIED"} — ${esc(r.reason)} ${r.resolved_ip?"("+r.resolved_ip+")":""}</p>`}
+V["Report"]=()=>`<div class="card"><h3>Unified VAPT report</h3><p>Generates the client-ready PDF (executive summary, methodology & rules of engagement, tool execution summary, severity distribution, detailed findings with evidence references, remediation roadmap, limitations, approvals, integration matrix, audit integrity) and a JSON export.</p>
+ <button onclick="gen()">Generate report</button> ${S.reports.length?`<a class="lnk" href="/api/assessments/${cur}/report.pdf">Download PDF</a> · <a class="lnk" href="/api/assessments/${cur}/report.json">Download JSON</a> <span class="mut">(last: ${S.reports.at(-1)})</span>`:""}</div>`;
+async function gen(){await post(`/api/assessments/${cur}/report`,{});await refresh()}
+$("#input").addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey))send()});
+(async()=>{health=await api("/api/health");await loadList();render();setInterval(async()=>{if(cur&&!["Audit","Scope"].includes(tab)&&!document.activeElement.matches("input,textarea,select")){await refresh()}},2500)})();
+</script>
+</body>
+</html>

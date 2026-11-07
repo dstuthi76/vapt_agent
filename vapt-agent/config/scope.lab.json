@@ -1,0 +1,24 @@
+{
+  "engagement": "Innovation Hackathon — authorized sandbox lab assessment",
+  "authorization_ref": "HACKATHON-LAB-AUTH-001 (organizer-provided lab; replace with your authorization reference)",
+  "authorized_by": "Hackathon organizers / lab owner",
+  "window": {"start": null, "end": null},
+  "targets": [
+    {"value": "172.28.10.0/24", "label": "docker lab subnet", "criticality": "medium", "exposure": "internal"},
+    {"value": "juice-shop", "label": "OWASP Juice Shop (web app + API)", "criticality": "high", "exposure": "external"},
+    {"value": "dvwa", "label": "DVWA (PHP web app)", "criticality": "medium", "exposure": "dmz"},
+    {"value": "metasploitable", "label": "Metasploitable 2 (legacy Linux server)", "criticality": "high", "exposure": "internal"},
+    {"value": "host.docker.internal", "label": "ResQNet (my app on my PC)", "criticality": "high", "exposure": "external"}
+  ],
+  "host_aliases": {
+    "juice-shop": "172.28.10.10",
+    "dvwa": "172.28.10.11",
+    "metasploitable": "172.28.10.12"
+  },
+  "exclusions": ["172.28.10.1", "172.28.10.5", "172.28.10.6", "172.28.10.7"],
+  "allowed_ports": "1-65535",
+  "allowed_tools": ["nmap", "nikto", "zap", "openvas", "nessus", "burp", "metasploit"],
+  "max_rate_pps": 300,
+  "allow_non_private": false,
+  "notes": "172.28.10.1 = docker gateway, .5 = agent, .6 = ZAP, .7 = msfrpcd: excluded so the agent never scans its own tooling."
+}

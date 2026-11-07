@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!-- SYNTHETIC TEST FIXTURE: hand-written in Burp 'Report issues' XML format to exercise the parser. Not real scanner output. -->
+<issues burpVersion="2024.x">
+<issue><serialNumber>1001</serialNumber><type>1049088</type><name>SQL injection</name><host ip="172.28.10.10">http://juice-shop:3000</host><path>/rest/products/search</path><location>/rest/products/search [q URL parameter]</location>
+<severity>High</severity><confidence>Firm</confidence><issueBackground>SQL injection vulnerabilities arise when user-controllable data is incorporated into database SQL queries in an unsafe manner.</issueBackground>
+<remediationBackground>Use parameterized queries (prepared statements) for all database access.</remediationBackground>
+<vulnerabilityClassifications>&lt;ul&gt;&lt;li&gt;&lt;a href="https://cwe.mitre.org/data/definitions/89.html"&gt;CWE-89: SQL Injection&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;</vulnerabilityClassifications>
+<issueDetail>The q parameter appears to be vulnerable to SQL injection. A single quote produced a SQLITE_ERROR message.</issueDetail>
+<requestresponse><request method="GET" base64="true">R0VUIC9yZXN0L3Byb2R1Y3RzL3NlYXJjaD9xPSUyNyBIVFRQLzEuMQ0KSG9zdDoganVpY2Utc2hvcDozMDAwDQoNCg==</request></requestresponse></issue>
+<issue><serialNumber>1002</serialNumber><type>2098689</type><name>Cross-origin resource sharing: arbitrary origin trusted</name><host ip="172.28.10.10">http://juice-shop:3000</host><path>/rest/user/whoami</path>
+<severity>Low</severity><confidence>Certain</confidence><issueBackground>The application trusts arbitrary origins in its CORS policy.</issueBackground><remediationBackground>Allow only trusted origins.</remediationBackground>
+<vulnerabilityClassifications>CWE-942</vulnerabilityClassifications><issueDetail>Access-Control-Allow-Origin reflected https://evil.example</issueDetail></issue>
+</issues>

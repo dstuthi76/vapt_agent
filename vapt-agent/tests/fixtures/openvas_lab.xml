@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SYNTHETIC TEST FIXTURE: hand-written in Greenbone XML report format to exercise the parser. OIDs are fake. Not real scanner output. -->
+<report id="fixture"><report><results>
+<result id="r1"><name>vsftpd Compromised Source Packages Backdoor Vulnerability</name><host>172.28.10.12</host><port>21/tcp</port>
+<nvt oid="1.3.6.1.4.1.25623.1.0.999001"><name>vsftpd Compromised Source Packages Backdoor Vulnerability</name><cvss_base>9.8</cvss_base>
+<tags>cvss_base_vector=CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H|summary=vsftpd 2.3.4 downloaded between 2011-06-30 and 2011-07-03 contains a backdoor.|solution_type=VendorFix</tags>
+<solution>Upgrade to a non-compromised vsftpd release.</solution><refs><ref type="cve" id="CVE-2011-2523"/></refs></nvt>
+<threat>High</threat><severity>9.8</severity><qod><value>99</value></qod><description>The backdoor answered on port 6200/tcp.</description><creation_time>2026-11-04T10:40:00Z</creation_time></result>
+<result id="r2"><name>Anonymous FTP Login Reporting</name><host>172.28.10.12</host><port>21/tcp</port>
+<nvt oid="1.3.6.1.4.1.25623.1.0.999002"><name>Anonymous FTP Login Reporting</name><cvss_base>6.4</cvss_base><tags>summary=Reports if the remote FTP Server allows anonymous logins.</tags><refs><ref type="cve" id="CVE-1999-0497"/></refs></nvt>
+<threat>Medium</threat><severity>6.4</severity><qod><value>80</value></qod><description>It was possible to login to the remote FTP service with: anonymous:anonymous@example.com</description></result>
+<result id="r3"><name>Apache HTTP Server End of Life (EOL) Detection</name><host>172.28.10.12</host><port>80/tcp</port>
+<nvt oid="1.3.6.1.4.1.25623.1.0.999003"><name>Apache HTTP Server End of Life (EOL) Detection</name><cvss_base>10.0</cvss_base><tags>summary=The installed Apache 2.2.8 has reached end of life.</tags></nvt>
+<threat>High</threat><severity>10.0</severity><qod><value>80</value></qod><description>Installed version: 2.2.8 (banner-based)</description></result>
+<result id="r4"><name>Telnet Unencrypted Cleartext Login</name><host>172.28.10.12</host><port>8023/tcp</port>
+<nvt oid="1.3.6.1.4.1.25623.1.0.999004"><name>Telnet Unencrypted Cleartext Login</name><cvss_base>4.8</cvss_base><tags>summary=The remote host is running a Telnet service that allows cleartext logins.</tags></nvt>
+<threat>Medium</threat><severity>4.8</severity><qod><value>70</value></qod><description>Fixture case: port 8023 was NOT observed open by Nmap, so confidence should drop.</description></result>
+</results></report></report>

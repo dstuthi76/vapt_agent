@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+<!-- SYNTHETIC TEST FIXTURE: hand-written in .nessus v2 format to exercise the parser. Plugin IDs 99000x are fake. Not real scanner output. -->
+<NessusClientData_v2><Report name="lab-fixture">
+<ReportHost name="172.28.10.12"><HostProperties><tag name="host-ip">172.28.10.12</tag><tag name="HOST_END">Wed Nov  4 10:30:00 2026</tag></HostProperties>
+<ReportItem port="21" svc_name="ftp" protocol="tcp" severity="4" pluginID="990001" pluginName="vsftpd Smiley Face Backdoor" pluginFamily="FTP">
+<description>The FTP server responds to a username ending in ':)' by opening a shell on port 6200.</description><solution>Validate and recompile a legitimate copy of the source code.</solution>
+<cve>CVE-2011-2523</cve><cvss3_base_score>9.8</cvss3_base_score><cvss3_vector>CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H</cvss3_vector><exploit_available>true</exploit_available>
+<plugin_output>Banner: 220 (vsFTPd 2.3.4)</plugin_output></ReportItem>
+<ReportItem port="21" svc_name="ftp" protocol="tcp" severity="2" pluginID="990002" pluginName="Anonymous FTP Enabled" pluginFamily="FTP">
+<description>Nessus has detected that the FTP server allows anonymous logins.</description><solution>Disable anonymous FTP if it is not required.</solution>
+<cve>CVE-1999-0497</cve><cvss3_base_score>5.3</cvss3_base_score><cvss3_vector>CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N</cvss3_vector><plugin_output>The contents of the remote FTP root are : pub</plugin_output></ReportItem>
+<ReportItem port="445" svc_name="cifs" protocol="tcp" severity="2" pluginID="990003" pluginName="SMB Signing not required" pluginFamily="Misc.">
+<description>Signing is not required on the remote SMB server.</description><solution>Enforce message signing in the host's configuration.</solution>
+<cvss3_base_score>5.3</cvss3_base_score><cvss3_vector>CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N</cvss3_vector></ReportItem>
+<ReportItem port="22" svc_name="ssh" protocol="tcp" severity="0" pluginID="990004" pluginName="SSH Server Type and Version Information" pluginFamily="Service detection">
+<description>It is possible to obtain information about the remote SSH server.</description><plugin_output>SSH version : SSH-2.0-OpenSSH_4.7p1 Debian-8ubuntu1</plugin_output></ReportItem>
+</ReportHost>
+<ReportHost name="192.168.99.50"><HostProperties><tag name="host-ip">192.168.99.50</tag></HostProperties>
+<ReportItem port="80" svc_name="www" protocol="tcp" severity="3" pluginID="990005" pluginName="Out-of-scope host example" pluginFamily="Web Servers"><description>This host is NOT in the registered scope and must be dropped on import.</description><cvss3_base_score>7.5</cvss3_base_score></ReportItem>
+</ReportHost>
+</Report></NessusClientData_v2>
